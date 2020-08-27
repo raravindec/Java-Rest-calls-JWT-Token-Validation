@@ -1,0 +1,54 @@
+package com.appid.service;
+
+import java.io.IOException;
+
+import org.jose4j.jwk.HttpsJwks;
+import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.consumer.InvalidJwtException;
+import org.jose4j.jwt.consumer.JwtConsumer;
+import org.jose4j.jwt.consumer.JwtConsumerBuilder;
+import org.jose4j.keys.resolvers.HttpsJwksVerificationKeyResolver;
+
+public class JWTTokenValidation {
+	private static final String ISSUER = "https://us-south.appid.cloud.ibm.com/oauth/v4/aa84dc98-2c2a-4dc6-b60b-fa0cf118f256";
+	private static final String KEY_ENDPOINT = ISSUER+"/publickeys";
+	private static final String AUDIENCE = "3550cc4e-13dc-4a13-901c-30d4430c6a10";
+	  
+	  
+	public static void main(String[] args) throws IOException {
+		String token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFwcElkLWFhODRkYzk4LTJjMmEtNGRjNi1iNjBiLWZhMGNmMTE4ZjI1Ni0yMDIwLTA3LTEzVDExOjI2OjE5LjY0NiIsInZlciI6NH0.eyJpc3MiOiJodHRwczovL3VzLXNvdXRoLmFwcGlkLmNsb3VkLmlibS5jb20vb2F1dGgvdjQvYWE4NGRjOTgtMmMyYS00ZGM2LWI2MGItZmEwY2YxMThmMjU2IiwiZXhwIjoxNTk3OTc3MjY1LCJhdWQiOlsiMzU1MGNjNGUtMTNkYy00YTEzLTkwMWMtMzBkNDQzMGM2YTEwIl0sInN1YiI6IjhhZWVjZmQyLTBkY2MtNDQ4OC1hMTg4LWY5YTNjMzM0YmJkYyIsImFtciI6WyJhcHBpZF9jdXN0b20iXSwiaWF0IjoxNTk3OTczNjY0LCJ0ZW5hbnQiOiJhYTg0ZGM5OC0yYzJhLTRkYzYtYjYwYi1mYTBjZjExOGYyNTYiLCJzY29wZSI6Im9wZW5pZCBhcHBpZF9kZWZhdWx0IGFwcGlkX3JlYWR1c2VyYXR0ciBhcHBpZF9yZWFkcHJvZmlsZSBhcHBpZF93cml0ZXVzZXJhdHRyIGFwcGlkX2F1dGhlbnRpY2F0ZWQgb3JiaXRhbHJ4MS5yZWFkIn0.TwjHwbElnENY5MjiaIPblqgHEnhrG3ia5XI-fZ8vtDUg1KzspaZTuBGy3nWFQpzHXICQNfQWjmy1cKbMNZAWA_5rg3Lwe9tNNeiwv_nPgtbsK-X-izS89lcZz59qz1bOSubp5lgL-iZ1oNsTpPrSbF3jmw7WpEcaxZqUmZLzrHZLj4oYm-zUYY7PMvzcNfxlNqykn31BVIaGQ63aYhD4K3W7DoxpxvFUSCILkpOmw8Z4keHij_2UxEx94KdprTD11yKouHHJ5L5Cu3Y0TKIVnIdxH_BU2rSbTtWGE_jrU7WtMRcTWUz319R35p7nEddcRiH3Z_918m_rRLJ20PZaQw";
+		JWTTokenValidation.validateToken(token);
+	}
+
+	private static void validateToken(String token) {
+		boolean isValidAssetToken = false;
+	    // Get the asset token from the HTTP Authorization header, removing the "Bearer "
+
+	    // The HttpsJwksVerificationKeyResolver uses JWKs obtained from the HttpsJwks and
+	    // selects the most appropriate one to use for verification based on the Key ID and other factors
+	    // provided in the header of the JWS/JWT.
+	    HttpsJwks httpsJkws = new HttpsJwks(KEY_ENDPOINT);
+	    HttpsJwksVerificationKeyResolver httpsJwksKeyResolver = new
+	    HttpsJwksVerificationKeyResolver(httpsJkws);
+
+	    // The JwtConsumer establishes the rules for Validation of our asset token.
+	    JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+	      .setVerificationKeyResolver(httpsJwksKeyResolver)
+	      .setRequireExpirationTime() // The JWT must have an expiration time.
+	      .setAllowedClockSkewInSeconds(30) // Allow some leeway in validating time-based claims to account for clock skew.
+	      .setExpectedIssuer(ISSUER) // Entity that the asset token must be issued by.
+	      .setExpectedAudience(AUDIENCE) // Entity that the asset token is intended for.
+	      .build(); // Create the JwtConsumer instance.
+	    try {
+	      // Validate the JWT and process it to the Claims.
+	      JwtClaims jwtClaims = jwtConsumer.processToClaims(token);
+	      isValidAssetToken = true;
+	      System.out.println("Token Validated");
+	    } catch (InvalidJwtException e) {
+	        // InvalidJwtException thrown if the asset token failed processing or validation.
+	        System.out.println("Invalid Asset Token: " + e);
+	    }
+
+	}
+
+}
