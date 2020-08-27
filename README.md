@@ -1,5 +1,5 @@
 # IBM-APPID---Java-Rest-calls
-This repository is used to make rest calls to IBM AppID instance using Java rest calls.
+This repository is used to make rest calls to IBM AppID instance using Java rest calls and how to validate JWT Token
 
 Need to have an IBM AppId instance created in IBM Cloud.
 
