@@ -1,0 +1,179 @@
+package com.appid.service;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.jose4j.jwk.HttpsJwks;
+import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.consumer.InvalidJwtException;
+import org.jose4j.jwt.consumer.JwtConsumer;
+import org.jose4j.jwt.consumer.JwtConsumerBuilder;
+import org.jose4j.keys.resolvers.HttpsJwksVerificationKeyResolver;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+public class APICallUsingJava {
+	  
+	  
+	public static void main(String[] args) throws IOException {
+		APICallUsingJava.MyGETRequest();
+		APICallUsingJava.getIAMToken();
+		APICallUsingJava.customizeToken();
+	}
+
+
+	public static void getIAMToken() throws IOException {
+		Map<String, Object> params = new LinkedHashMap<>();
+		params.put("grant_type", "urn:ibm:params:oauth:grant-type:apikey");
+		params.put("apikey", "b1m7RUGB0BVPMvrECc4-pNKltd10mJ5r7ifvJMxebw-v");
+
+		StringBuilder postData = new StringBuilder();
+		for (Map.Entry<String, Object> param : params.entrySet()) {
+			if (postData.length() != 0)
+				postData.append('&');
+			postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+			postData.append('=');
+			postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+		}
+		byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+		URL urlForGetRequest = new URL("https://iam.cloud.ibm.com//oidc/token");
+		String readLine = null;
+		HttpURLConnection conection = (HttpURLConnection) urlForGetRequest.openConnection();
+		conection.setRequestMethod("POST");
+		conection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+		conection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+		conection.setDoOutput(true);
+		conection.getOutputStream().write(postDataBytes);
+
+		int responseCode = conection.getResponseCode();
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			BufferedReader in = new BufferedReader(new InputStreamReader(conection.getInputStream()));
+			StringBuffer response = new StringBuffer();
+			while ((readLine = in.readLine()) != null) {
+				response.append(readLine);
+			}
+			in.close();
+			// print result
+			System.out.println("JSON String Result " + response.toString());
+
+			JsonParser parser = new JsonParser();
+
+			JsonElement jsonTree = parser.parse(response.toString());
+
+			if (jsonTree.isJsonObject()) {
+				JsonObject jsonObject = jsonTree.getAsJsonObject();
+
+				JsonElement f1 = jsonObject.get("access_token");
+				System.out.println("AccessTOken is : " + f1.toString());
+
+				/*
+				 * JsonElement f2 = jsonObject.get("f2");
+				 * 
+				 * if(f2.isJsonObject()){ JsonObject f2Obj =
+				 * f2.getAsJsonObject();
+				 * 
+				 * JsonElement f3 = f2Obj.get("f3"); }
+				 */
+
+			}
+
+		} else {
+			System.out.println("POST DIDNOT WORK");
+		}
+	}
+
+	private static void customizeToken() throws IOException {
+		Map<String, Object> params = new LinkedHashMap<>();
+		params.put("grant_type", "urn:ibm:params:oauth:grant-type:apikey");
+		params.put("apikey", "b1m7RUGB0BVPMvrECc4-pNKltd10mJ5r7ifvJMxebw-v");
+
+		StringBuilder postData = new StringBuilder();
+		for (Map.Entry<String, Object> param : params.entrySet()) {
+			if (postData.length() != 0)
+				postData.append('&');
+			postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+			postData.append('=');
+			postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+		}
+		byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+		URL urlForGetRequest = new URL("https://iam.cloud.ibm.com//oidc/token");
+		String readLine = null;
+		HttpURLConnection conection = (HttpURLConnection) urlForGetRequest.openConnection();
+		conection.setRequestMethod("POST");
+		conection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+		conection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+		conection.setDoOutput(true);
+		conection.getOutputStream().write(postDataBytes);
+
+		int responseCode = conection.getResponseCode();
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			BufferedReader in = new BufferedReader(new InputStreamReader(conection.getInputStream()));
+			StringBuffer response = new StringBuffer();
+			while ((readLine = in.readLine()) != null) {
+				response.append(readLine);
+			}
+			in.close();
+			// print result
+			System.out.println("JSON String Result " + response.toString());
+
+			JsonParser parser = new JsonParser();
+
+			JsonElement jsonTree = parser.parse(response.toString());
+
+			if (jsonTree.isJsonObject()) {
+				JsonObject jsonObject = jsonTree.getAsJsonObject();
+
+				JsonElement f1 = jsonObject.get("access_token");
+				System.out.println("AccessTOken is : " + f1.toString());
+
+				/*
+				 * JsonElement f2 = jsonObject.get("f2");
+				 * 
+				 * if(f2.isJsonObject()){ JsonObject f2Obj =
+				 * f2.getAsJsonObject();
+				 * 
+				 * JsonElement f3 = f2Obj.get("f3"); }
+				 */
+
+			}
+
+		} else {
+			System.out.println("POST DIDNOT WORK");
+		}
+
+	}
+
+	public static void MyGETRequest() throws IOException {
+		URL urlForGetRequest = new URL("https://jsonplaceholder.typicode.com/posts/1");
+		String readLine = null;
+		HttpURLConnection conection = (HttpURLConnection) urlForGetRequest.openConnection();
+		conection.setRequestMethod("GET");
+		conection.setRequestProperty("userId", "a1bcdef"); // set userId its a
+															// sample here
+		int responseCode = conection.getResponseCode();
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			BufferedReader in = new BufferedReader(new InputStreamReader(conection.getInputStream()));
+			StringBuffer response = new StringBuffer();
+			while ((readLine = in.readLine()) != null) {
+				response.append(readLine);
+			}
+			in.close();
+			// print result
+			System.out.println("JSON String Result " + response.toString());
+			// GetAndPost.POSTRequest(response.toString());
+		} else {
+			System.out.println("GET NOT WORKED");
+		}
+
+	}
+}
